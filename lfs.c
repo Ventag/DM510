@@ -91,10 +91,11 @@ void init()
 int get_depth(const char *path)
 {
     int i = 0;
-    char *p;
-    p = path;
-    while(*p != '\0') {
-        if(*p == '/') i++;
+    char *p = path;
+    while(*p != '\0')
+    {
+        if(*p == '/')
+            i++;
         p++;
     }
     return i;
@@ -105,14 +106,15 @@ char* get_filename_at(int depth, const char *path)
     int i = 0, j = 0;
     char *p, *r;
     p = path;
-    while(i <= depth) {
-        if(p[j] == '/' || p[j] == '\0') {
+    while(i <= depth)
+    {
+        if(p[j] == '/' || p[j] == '\0')
             i++;
-        };
         j++;
     }
     i = j;
-    while(p[j] != '/' && p[j] != '\0') j++;
+    while(p[j] != '/' && p[j] != '\0')
+        j++;
     p[j] = '\0';
     r = &p[i];
     return r;
@@ -122,8 +124,10 @@ char* get_filename(const char *path)
 {
     char *p;
     p = path;
-    while(*p != '\0') p++;
-    while(*p != '/') p--;
+    while(*p != '\0')
+        p++;
+    while(*p != '/')
+        p--;
     p++;
     return p;
 }
@@ -321,6 +325,7 @@ int lfs_open(const char *path, struct fuse_file_info *fi)
 
     if(strcmp(node->name, get_filename(path)) == 0)
     {
+        node->accessed = time(NULL);
         fi->fh = (uint64_t)node;
         return 0;
     }
@@ -348,6 +353,7 @@ int lfs_write(const char* path, const char* buf, size_t size, off_t offset, stru
     if(!node)
         return -ENOENT;
     free(node->data);
+    node->modified = time(NULL);
     node->data = malloc(size);
     node->size = size;
     memcpy(node->data, buf, node->size);
