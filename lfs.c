@@ -70,7 +70,7 @@ void init()
 
     inode* n1 = make_node("test", NULL, 1);
     inode* n2 = make_node("test1", NULL, 1);
-    inode* n3 = make_node("filetest.txt", "1223456778121gabe you are VERY gay", 0);
+    inode* n3 = make_node("filetest.txt", "sample file text", 0);
 
     vector_push(&root->items, n1);
     vector_push(&root->items, n2);
