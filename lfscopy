@@ -45,7 +45,7 @@ inode* make_node(char* name, char* data, int directory)
 {
     if(strlen(name) > 20)
     {
-        printf("[MAKE_NODE name is too long]\n");
+        printf("node name was too long\n");
         return NULL;
     }
 
@@ -79,7 +79,7 @@ void init()
 
     inode* n1 = make_node("test", NULL, 1);
     inode* n2 = make_node("test1", NULL, 1);
-    inode* n3 = make_node("filetest.txt", "1223456778121gabe you are VERY gay", 0);
+    inode* n3 = make_node("filetest.txt", "some arbitrary content in file:wq", 0);
 
     vector_push(&root->items, n1);
     vector_push(&root->items, n2);
@@ -128,28 +128,6 @@ char* get_filename(const char *path)
     return p;
 }
 
-char* get_folder(const char* path)
-{
-    char* p = path;
-    int i = 0, j = 0, depth = get_depth(path);
-    if ( depth > 1 )
-    {
-        while(i < depth)
-        {
-            if(p[j] == '/')
-            {
-                i++;
-            };
-            j++;
-        }
-        p[j-1] = '\0';
-    }
-    else
-        p = "/";
-
-    return p;
-}
-
 inode* find_inode_in_vector(inode *node, const char *name)
 {
     size_t size = vector_size(&node->items);
@@ -163,6 +141,7 @@ inode* find_inode_in_vector(inode *node, const char *name)
     }
     return NULL;
 }
+
 
 inode* get_inode(char* path)
 {
@@ -184,29 +163,27 @@ inode* get_inode(char* path)
 int lfs_getattr(const char *path, struct stat *stbuf)
 {
     int res = 0;
+
     memset(stbuf, 0, sizeof(struct stat));
     char* dup = strdup(path);
     inode* node = get_inode(dup);
 
     if( strcmp( path, "/" ) == 0 )
     {
-        printf("[CALLING lfs_getattr ON (%s)] [Node is Root]\n", path);
-
+        printf("getattr: (path=%s)\n", path);
         stbuf->st_mode = S_IFDIR | 0755;
         stbuf->st_nlink = 2;
         return 0;
     }
     else if( node != NULL && node->directory)
     {
-        printf("[CALLING lfs_getattr ON (%s)] [Node is Dir]\n", path);
-
+        printf("getattr: (path=%s)\n", path);
         stbuf->st_mode = S_IFDIR | 0755;
         stbuf->st_nlink = 2;
     }
     else if(node != NULL)
     {
-        printf("[CALLING lfs_getattr ON (%s)] [Node is File]\n", path);
-
+        printf("getattr: (path=%s)\n", path);
         stbuf->st_mode = S_IFREG | 0777;
         stbuf->st_nlink = 1;
         stbuf->st_size = node->size;
@@ -224,11 +201,10 @@ int lfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
 {
     (void) offset;
     (void) fi;
-    printf("[CALLING lfs_readdir ON (%s)]\n", path);
 
     inode* node;
-
     char* dup = strdup(path);
+
     if ((node = get_inode(dup)) == NULL) return -ENOENT;
 
     filler(buf, ".", NULL,0);
@@ -249,17 +225,25 @@ int lfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
 int lfs_mknod(const char* path, mode_t mode, dev_t dev)
 {
     char *r = strdup(path);
-    char *p = strdup(path);
+    char *p = path;
+    int i = 0, j = 0, depth = get_depth(path);
+    if ( depth > 1 ) {
+        while(i < depth) {
+            if(p[j] == '/') {
+                i++;
+            };
+            j++;
+        }
+        p[j-1] = '\0';
+    } else {
+        p = "/";
+    }
 
-    p = get_folder(p);
+    printf("mknod p = %s\n", p);
 
-    printf("[MKNOD PARENT FOLDER] p = %s\n", p);
-
-    inode* n = get_inode(p);
+    char* dup = strdup(path);
+    inode* n = get_inode(dup);
     inode* node = make_node(get_filename(r), "\0", 0);
-    if(!node)
-        return -ENOENT;
-
     vector_push(&n->items, node);
     return 0;
 }
@@ -267,17 +251,25 @@ int lfs_mknod(const char* path, mode_t mode, dev_t dev)
 int lfs_mkdir(const char* path, mode_t t)
 {
     char *r = strdup(path);
-    char *p = strdup(path);
+    char *p = path;
+    int i = 0, j = 0, depth = get_depth(path);
+    if ( depth > 1 ) {
+        while(i < depth) {
+            if(p[j] == '/') {
+                i++;
+            };
+            j++;
+        }
+        p[j-1] = '\0';
+    } else {
+        p = "/";
+    }
 
-    p = get_folder(p);
+    printf("mkdir p = %s\n", p);
 
-    printf("[MKDIR PARENT FOLDER] p = %s\n", p);
-
-    inode* n = get_inode(p);
+    char* dup = strdup(path);
+    inode* n = get_inode(dup);
     inode* node = make_node(get_filename(r), 0, 1);
-    if(!node)
-        return -ENOENT;
-
     vector_push(&n->items, node);
     return 0;
 }
@@ -285,14 +277,25 @@ int lfs_mkdir(const char* path, mode_t t)
 int lfs_rmdir(const char* path, mode_t t)
 {
     char *r = strdup(path);
-    char *p = strdup(path);
+    char *p = path;
+    int i = 0, j = 0, depth = get_depth(path);
+    if ( depth > 1 ) {
+        while(i < depth) {
+            if(p[j] == '/') {
+                i++;
+            };
+            j++;
+        }
+        p[j-1] = '\0';
+    } else {
+        p = "/";
+    }
 
-    p = get_folder(p);
+    printf("p = %s\n", p);
 
-    printf("[RMDIR PARENT FOLDER] p = %s\n", p);
-
-    inode *n = get_inode(p);
     char* name = get_filename(r);
+    char* dup = strdup(path);
+    inode *n = get_inode(dup);
     vector_t new;
     vector_init(&new);
 
@@ -311,9 +314,10 @@ int lfs_rmdir(const char* path, mode_t t)
     return 0;
 }
 
+//Permission
 int lfs_open(const char *path, struct fuse_file_info *fi)
 {
-    printf("[CALLING lfs_open ON (%s)]\n", path);
+    printf("[CALLING lfs_open on %s]\n", path);
     char* dup = strdup(path);
     inode* node = get_inode(dup);
     if(!node || node->directory)
@@ -330,28 +334,23 @@ int lfs_open(const char *path, struct fuse_file_info *fi)
 
 int lfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    printf("[CALLING lfs_read ON (%s)]\n", path);
+    printf("[CALLING lfs_read on %s]\n", path);
     char* dup = strdup(path);
-    inode* node = get_inode(dup);
-    if(!node)
-        return -ENOENT;
-
+    inode* node = get_inode(dup);//(inode*)fi->fh;
     sprintf(buf, node->data, size);
     return strlen(node->data);
 }
 
 int lfs_write(const char* path, const char* buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    printf("[CALLING lfs_write ON (%s)\n", path);
     char* dup = strdup(path);
     inode* node = get_inode(dup);
-    if(!node)
-        return -ENOENT;
     free(node->data);
     node->data = malloc(size);
     node->size = size;
     memcpy(node->data, buf, node->size);
 
+    printf("size: %d - node size: %d\n", size, node->size);
     return size;
 }
 
@@ -361,7 +360,7 @@ int lfs_release(const char *path, struct fuse_file_info *fi)
     if(node)
     {
         fi->fh = NULL;
-        printf("[CALLING lfs_release ON (node %s)]\n", node->name);
+        printf("released node %s\n", node->name);
         return 0;
     }
 

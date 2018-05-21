@@ -37,10 +37,6 @@ void vector_init(vector_t *vector)
             printf("Failed to allocate memory.\n");
         } //failsafe for malloc, in case memory is full etc.
     }
-    else
-    {
-        printf("Failed to initialize vector, vector is null or vector already initialized\n"); //if null then exit
-    }
 }
 
 // Deallocate internal structures of the vector
@@ -53,10 +49,6 @@ void vector_delete(vector_t *vector)
         free(vector->vbuffer);   // free the allocated memory
         vector->capacity = 0;    // reset capacity
         vector->size = 0;        // reset size
-    }
-    else
-    {
-        printf("Failed to delete vector, vector might not have been initialized.\n");
     }
 }
 
@@ -88,10 +80,6 @@ void vector_push(vector_t *vector, void *value)
         vector->vbuffer[vector->size] = value; // update the last element in the vector to the value given.
         vector->size++; // increment the size for future pushes.
     }
-    else
-    {
-        printf("Vector is null, not initialized or value may be null\n");
-    }
 }
 
 // Remove the last element in the vector and return the value
@@ -101,13 +89,10 @@ void *vector_pop(vector_t *vector)
     if (vector != NULL &&
         vector->size >= 1)
     { // first we check if the vector is not null and that the size of the vector is valid.
-        void *element = vector->vbuffer[vector->size - 1]; // put void * element on the stack and retrieve the last element from our buffer and assign it to element.
+        void *element = vector->vbuffer[vector->size -
+                                        1]; // put void * element on the stack and retrieve the last element from our buffer and assign it to element.
         vector->size = vector->size - 1; //decrement the size since we've popped it.
         return element; // return to user.
-    }
-    else
-    {
-        printf("Vector is null or not initialized.\n");
     }
 }
 
@@ -119,7 +104,6 @@ size_t vector_size(const vector_t *vector)
         return vector->size; // return to user.
     else
     {
-        printf("Vector is null or not initialized.\n");
         exit(1);
     }
 }
@@ -146,7 +130,6 @@ void *vector_get_element(const vector_t *vector, size_t index)
         return vector->vbuffer[index]; //return the given index in the buffer.
     else
     {
-        printf("Vector is null, not initialized or index >= size.\n");
         return NULL;
     }
 }
@@ -157,9 +140,5 @@ void **vector_get_array(const vector_t *vector)
     if (vector != NULL)
     { // Not explicitly stated as a prerequisite. Should still check this though.
         return vector->vbuffer; // return the actual.
-    }
-    else
-    {
-        printf("Attempt to access array of NULL vector.\n");
     }
 }
