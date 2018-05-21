@@ -13,7 +13,6 @@ typedef struct inode
     time_t modified;
     time_t accessed;
     size_t size;
-    size_t index;
     char* name;
     char* data;
 

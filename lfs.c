@@ -45,7 +45,6 @@ inode* make_node(char* name, char* data, int directory)
     node = malloc(sizeof(inode));
     vector_init(&node->items);
     node->name = name;
-    node->index = 0;
     if(directory == 0)
     {
         node->data = malloc(strlen(data));
@@ -95,21 +94,21 @@ int get_depth(const char *path)
 
 char* get_filename_at(int depth, const char *path)
 {
-    int i = 0, j = 0;
-    char *p, *r;
+    //count = i, curr = j
+    int count = 0, curr = 0;
+    char *p;
     p = path;
-    while(i <= depth)
+    while(count <= depth)
     {
-        if(p[j] == '/' || p[j] == '\0')
-            i++;
-        j++;
+        if(p[curr] == '/' || p[curr] == '\0')
+            count++;
+        curr++;
     }
-    i = j;
-    while(p[j] != '/' && p[j] != '\0')
-        j++;
-    p[j] = '\0';
-    r = &p[i];
-    return r;
+    count = curr;
+    while(p[curr] != '/' && p[curr] != '\0')
+        curr++;
+    p[curr] = '\0';
+    return &p[count];
 }
 
 char* get_filename(const char *path)
@@ -120,6 +119,7 @@ char* get_filename(const char *path)
         p++;
     while(*p != '/')
         p--;
+
     p++;
     return p;
 }
