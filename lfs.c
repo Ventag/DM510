@@ -94,7 +94,6 @@ int get_depth(const char *path)
 
 char* get_filename_at(int depth, const char *path)
 {
-    //count = i, curr = j
     int count = 0, curr = 0;
     char *p;
     p = path;
