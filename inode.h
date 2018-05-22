@@ -1,7 +1,3 @@
-/*
- * Created by Frederik Wexø on 5/20/18.
-*/
-
 #ifndef FUSE_INODE_H
 #define FUSE_INODE_H
 
